@@ -14,6 +14,10 @@ if (isset($bdd) AND !empty($_POST['email']) AND !empty($_POST['password'])) {
 
     $connexionsId = getConnexions($bdd, 'connexions', Array("ip" => $ip), Array());
 
+    //todo : set le navigateur et l'adresse ip actuellement utilisé
+    $CURRENTip = "128.0.0.1";
+    $CURRENTnav = "mozilla";
+
     if (!empty($connexionsId)) {
         if (count($connexionsId) >= 1) {
             $tentatives = $connexionsId[0]->nbTentatives;
