@@ -11,12 +11,11 @@ if (isset($bdd) AND !empty($_POST['email']) AND !empty($_POST['password'])) {
     $connexionsId = getConnexions($bdd, 'connexions', Array("ip" => $_POST['ip']), Array());
 
     if (!empty($connexionsId)) {
-        if (count($connexionsId) == 1) {
+        if (count($connexionsId) >= 1) {
             $tentatives = $connexionsId[0]->nbTentatives;
 
             // on ajoute une tentative dans le nombre de tentatives
             $query = "UPDATE connexions SET nbTentatives = nbTentatives + 1 WHERE id=:id";
-
             $statement = $bdd->prepare($query);
             $statement->bindParam(':id', $connexionsId[0]->id);
             $statement->execute();
@@ -43,6 +42,16 @@ if (isset($bdd) AND !empty($_POST['email']) AND !empty($_POST['password'])) {
                 }
             }
         }
+    } else {
+        // c'est la première fois qu'on essaie de se connecter avec cette IP, on incrémente le nb de tentatives
+        // todo : implémenter l'adresse IP et le navigateur
+        $ip="192.168.0.0";
+        $navigateur = "test";
+        $query = "INSERT INTO connexions(email, password, ip, navigateur, nbTentatives) VALUES ('', '', :ip, :navigateur, 1)";
+        $statement = $bdd->prepare($query);
+        $statement->bindParam(':ip', $ip);
+        $statement->bindParam(':navigateur', $navigateur);
+        $statement->execute();
     }
 
     if($tentatives < 10){
