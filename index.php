@@ -1,3 +1,9 @@
+<?php
+session_start();
+if(!$_SESSION['cle']){
+    header('Location: connection.php');
+}
+?>
 <html>
 <body>
 <div class="index_body">

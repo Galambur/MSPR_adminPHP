@@ -27,8 +27,8 @@ if(isset($_POST['valider'])){
                 $mail->SMTPSecure = 'ssl';
                 $mail->Host = 'smtp.gmail.com';
                 $mail->Port = '465';
-        $mail->Username = 'webmailerssl@gmail.com';
-        $mail->Password = 'mailermailer';
+                $mail->Username = 'webmailerssl@gmail.com';
+                $mail->Password = 'mailermailer';
 
    //   $path = 'reseller.pdf';
    //   $mail->AddAttachment($path);
@@ -41,16 +41,14 @@ if(isset($_POST['valider'])){
         $mail->Subject = $subject;
         $mail->Body = $body;
         $mail->AddAddress($to);
-        if(!$mail->Send())
-                        {
-                            $error ="Please try Later, Error Occured while Processing...";
-                            return $error;
-                        }
-                        else
-                        {
-                            $error = "Thanks You !! Your email is sent.";
-                            return $error;
-                        }
+                try {
+                    if (!$mail->Send()) {
+                        return "Please try Later, Error Occured while Processing...";
+                    } else {
+                        return "Email bien envoyé.";
+                    }
+                } catch (phpmailerException $e) {
+                }
 
             }
 
