@@ -8,6 +8,9 @@
     </header>
     <div class="centered_body">
         <!-- Titre de la page -->
+        <?php
+         echo $_SESSION["erreur"];
+        ?>
         <h2>Se connecter</h2>
         <form action="login.php" method="post">
             <label for="email">Email :</label>

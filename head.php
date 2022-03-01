@@ -3,7 +3,7 @@ session_start();
 
 require_once( 'functions.php');
 $id = null;
-$doNotHaveAccess = "<h2>Vous n'avez pas acces a cette page</h2>";
+$_SESSION["erreur"] = null;
 if (isset($_SESSION['id'])){
     $id = $_SESSION['id'];
 }
