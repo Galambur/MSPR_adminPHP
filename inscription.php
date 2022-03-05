@@ -1,14 +1,20 @@
 
 <?php
 require "PHPMailer/PHPMailerAutoload.php";
-session_start();
-$bdd = new PDO('mysql:host=localhost;dbname=chateletdb;charset=utf8','root','');
+require('functions.php');
+
+//session_start();
+$bdd = getDataBase();
+
+
 if(isset($_POST['valider'])){
     if(!empty($_POST['email'])) {
         $cle = rand(1000000,9000000);
         $email = $_POST['email'];
-        $insererUser = $bdd->prepare('INSERT INTO users(email, cle, confirme)VALUES(?, ?, ?,)');
-        $insererUser->execute(array($email, $cle, 0));
+        $insererUser = $bdd->prepare('INSERT INTO users(email, cle, confirme)VALUES(:email, :cle, 0)');
+        $insererUser->bindParam(':email', $email);
+        $insererUser->bindParam(':cle', $cle);
+        $insererUser->execute();
         
         $recupUser = $bdd->prepare('SELECT * FROM users WHERE email = ?');
         $recupUser->execute(array($email));
@@ -56,7 +62,7 @@ if(isset($_POST['valider'])){
             $from ='webmailerssl@gmail.com';
             $name = 'WebMailer';
             $subj = 'Email de confirmation de compte';
-            $msg = 'http://localhost/web/verif.php?id='.$_SESSION['id'].'&cle='.$cle;
+            $msg = 'http://localhost/verif.php?id='.$_SESSION['id'].'&cle='.$cle;
 
             $error=smtpmailer($to,$from, $name ,$subj, $msg);
         }
