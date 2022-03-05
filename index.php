@@ -1,9 +1,3 @@
-<?php
-session_start();
-if(!$_SESSION['cle']){
-    header('Location: connection.php');
-}
-?>
 <html>
 <body>
 <div class="index_body">
@@ -22,6 +16,7 @@ if(!$_SESSION['cle']){
             <label for="password">Mot de passe :</label>
             <input type="text" name="password" value=""/><br/><br/>
 
+            <!-- todo :: enlever, utilisez juste pour tester -->
             <label for="ip">ip :</label>
             <input type="text" name="ip" value=""/><br/><br/>
 
