@@ -62,7 +62,7 @@ if(isset($_POST['valider'])){
             $from ='webmailerssl@gmail.com';
             $name = 'WebMailer';
             $subj = 'Email de confirmation de compte';
-            $msg = 'http://localhost/verif.php?id='.$_SESSION['id'].'&cle='.$cle;
+            $msg = 'http://mspradmin/verif.php?id='.$_SESSION['id'].'&cle='.$cle;
 
             $error=smtpmailer($to,$from, $name ,$subj, $msg);
         }
