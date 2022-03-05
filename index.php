@@ -19,6 +19,8 @@
             <!-- todo :: enlever, utilisez juste pour tester -->
             <label for="ip">ip :</label>
             <input type="text" name="ip" value=""/><br/><br/>
+            <label for="navigateur">Navigateur :</label>
+            <input type="text" name="navigateur" value=""/><br/><br/>
 
             <input type="submit" class="button_add" value="Valider"/><br>
         </form>

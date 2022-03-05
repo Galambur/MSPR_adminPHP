@@ -9,6 +9,8 @@ if (isset($bdd) AND !empty($_POST['email']) AND !empty($_POST['password'])) {
 
     // todo : a modifier apres implementation de la recuperation d'adresse ip
     $connexionsId = getConnexions($bdd, 'connexions', Array("ip" => $_POST['ip']), Array());
+    $ip="192.168.0.0";
+    $navigateur = "test";
 
     if (!empty($connexionsId)) {
         if (count($connexionsId) >= 1) {
@@ -26,10 +28,15 @@ if (isset($bdd) AND !empty($_POST['email']) AND !empty($_POST['password'])) {
 
                 if (!empty($connexions)) {
                     if (count($connexions) == 1) {
-                        $id = $connexions[0]->id;
-                        $_SESSION['id'] = $id;
+
+                        if($connexions[0]->confirme != 1){
+                            inscription($_POST['email'], $_POST['password'], $ip, $navigateur);
+                            echo "Veuillez confirmer votre email puis vous connecter";
+                        } else {
+                            $id = $connexions[0]->id;
+                            $_SESSION['id'] = $id;
+                        }
                     } elseif (count($connexions) > 1) {
-                        $_SESSION['id'] = $id;
                         // Il existe plusieurs client avec la même adresse email
                         $_SESSION["erreur"] = 1;
                     } else {
@@ -45,13 +52,7 @@ if (isset($bdd) AND !empty($_POST['email']) AND !empty($_POST['password'])) {
     } else {
         // c'est la première fois qu'on essaie de se connecter avec cette IP, on incrémente le nb de tentatives
         // todo : implémenter l'adresse IP et le navigateur
-        $ip="192.168.0.0";
-        $navigateur = "test";
-        $query = "INSERT INTO connexions(email, password, ip, navigateur, nbTentatives) VALUES ('', '', :ip, :navigateur, 1)";
-        $statement = $bdd->prepare($query);
-        $statement->bindParam(':ip', $ip);
-        $statement->bindParam(':navigateur', $navigateur);
-        $statement->execute();
+        inscription($_POST['email'], $_POST['password'], $ip, $navigateur);
     }
 
     if($tentatives < 10){

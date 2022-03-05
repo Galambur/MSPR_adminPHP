@@ -14,7 +14,7 @@ if(isset($_GET['id']) AND !empty($_GET['id']) AND isset($_GET['cle']) AND !empty
         $updateConfirmation = $bdd->prepare('UPDATE connexions SET confirme = 1 WHERE id = :id');
         $updateConfirmation->bindParam(':id', $getid);
         $updateConfirmation->execute();
-        header('Location: login.php');
+        header('Location: index.php');
     } else{
         echo "Votre clé ou votre identifiant est incorrect";
         }
