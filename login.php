@@ -8,9 +8,11 @@ if (isset($bdd) AND !empty($_POST['email']) AND !empty($_POST['password'])) {
     $_SESSION["erreur"] = null;
 
     // todo : a modifier apres implementation de la recuperation d'adresse ip
-    $connexionsId = getConnexions($bdd, 'connexions', Array("ip" => $_POST['ip']), Array());
-    $ip="192.168.0.0";
-    $navigateur = "test";
+
+    $ip=getHostByName(getHostName());
+    $navigateur = getNavigator();
+
+    $connexionsId = getConnexions($bdd, 'connexions', Array("ip" => $ip), Array());
 
     if (!empty($connexionsId)) {
         if (count($connexionsId) >= 1) {

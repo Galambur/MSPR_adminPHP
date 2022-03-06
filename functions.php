@@ -157,4 +157,26 @@ function smtpmailer($to, $from, $from_name, $subject, $body)
     }
 
 }
+
+function getNavigator(){
+    echo 'Vous utilisez un navigateur de type: ';
+
+    if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE)
+        return 'Internet explorer';
+    elseif(strpos($_SERVER['HTTP_USER_AGENT'], 'Trident') !== FALSE) //For Supporting IE 11
+        return 'Internet explorer';
+    elseif(strpos($_SERVER['HTTP_USER_AGENT'], 'Firefox') !== FALSE)
+        return 'Mozilla Firefox';
+    elseif(strpos($_SERVER['HTTP_USER_AGENT'], 'Chrome') !== FALSE)
+        return 'Google Chrome';
+    elseif(strpos($_SERVER['HTTP_USER_AGENT'], 'Opera Mini') !== FALSE)
+        return "Opera Mini";
+    elseif(strpos($_SERVER['HTTP_USER_AGENT'], 'Opera') !== FALSE)
+        return "Opera";
+    elseif(strpos($_SERVER['HTTP_USER_AGENT'], 'Safari') !== FALSE)
+        return "Safari";
+    else
+        return 'Something else';
+}
+
 ?>
