@@ -5,7 +5,7 @@ function getDataBase()
 {
     try {
         $bdd = new PDO('mysql:host=localhost;dbname=chateletdb;charset=utf8',
-            'root', '', array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+            'admin', 'admin', array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
     } catch (Exception $exception) {
         $bdd = null;
     }
@@ -98,7 +98,6 @@ function inscription($email, $mdp, $ip, $nav)
 
     $cle = rand(1000000, 9000000);
 
-    //todo : implémenter nav et ip
     $insererUser = $bdd->prepare('INSERT INTO connexions(email, password, ip, navigateur, nbTentatives, cle, confirme) VALUES(:email, :password, :ip, :navigateur, 0, :cle, 0)');
     $insererUser->bindParam(':email', $email);
     $insererUser->bindParam(':password', $mdp);
@@ -114,11 +113,12 @@ function inscription($email, $mdp, $ip, $nav)
         $userInfos = $recupUser->fetch();
         $_SESSION['id'] = $userInfos['id'];
 
-        $to = $email;
+		// todo : remettre le bon mail
+        $to = "gaelle.derambure@epsi.fr";
         $from = 'clinique@chatelet.local';
         $name = 'Le Chatelet';
         $subj = 'Email de confirmation de compte';
-        $msg = 'http://mspradmin/verif.php?id=' . $_SESSION['id'] . '&cle=' . $cle;
+        $msg = 'http://192.168.208.130/verif.php?id=' . $_SESSION['id'] . '&cle=' . $cle;
 
         smtpmailer($to, $from, $name, $subj, $msg);
     }
@@ -159,8 +159,6 @@ function smtpmailer($to, $from, $from_name, $subject, $body)
 }
 
 function getNavigator(){
-    echo 'Vous utilisez un navigateur de type: ';
-
     if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE)
         return 'Internet explorer';
     elseif(strpos($_SERVER['HTTP_USER_AGENT'], 'Trident') !== FALSE) //For Supporting IE 11
