@@ -5,7 +5,7 @@ function getDataBase()
 {
     try {
         $bdd = new PDO('mysql:host=localhost;dbname=chateletdb;charset=utf8',
-            'admin', 'admin', array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+            'root', '', array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
     } catch (Exception $exception) {
         $bdd = null;
     }
@@ -13,15 +13,7 @@ function getDataBase()
 }
 
 function getConnexions(PDO $bdd, $fromTable, Array $cond = [], Array $condLike = [], $askSelect = '*', $specialCond = "")
-{ //Cond pour Condition
-    //Pour utiliser cette fonction il faut lui envoyer :
-    //La bdd
-    //Le(s) table au quel on veux accéder
-    //Une liste des condtions à récupérer tel que :
-    // array(arg1 => value1, arg2 => value 2, etc)
-    //Il est possible de demander les conditions avec like aussi
-    //Avec un exemple :
-    // array( 'idClient' => 15, 'prenom' => 'Gaelle')
+{
     $query = "SELECT {$askSelect} FROM {$fromTable} WHERE 1 ";
     //Etape 1 : On génère la requête sql avec les arguments demandés :
     foreach ($cond as $key => $arg) {
@@ -113,12 +105,12 @@ function inscription($email, $mdp, $ip, $nav)
         $userInfos = $recupUser->fetch();
         $_SESSION['id'] = $userInfos['id'];
 
-		// todo : remettre le bon mail
+        // todo : remettre le bon mail
         $to = "gaelle.derambure@epsi.fr";
         $from = 'clinique@chatelet.local';
         $name = 'Le Chatelet';
         $subj = 'Email de confirmation de compte';
-        $msg = 'http://192.168.208.130/verif.php?id=' . $_SESSION['id'] . '&cle=' . $cle;
+        $msg = '<a href = "http://mspradmin/verif.php?id=' . $_SESSION['id'] . '&cle=' . $cle .'">Verifier votre email'. '</a>';
 
         smtpmailer($to, $from, $name, $subj, $msg);
     }
@@ -154,24 +146,37 @@ function smtpmailer($to, $from, $from_name, $subject, $body)
             return "Email bien envoyé.";
         }
     } catch (phpmailerException $e) {
+        echo $e;
     }
-
 }
 
-function getNavigator(){
-    if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE)
+function getLocationInfoByIp()
+{
+    $result = array('country' => '', 'city' => '');
+    $ip = getHostByName(getHostName());
+    $ip_data = @json_decode(file_get_contents("http://www.geoplugin.net/json.gp?ip=" . $ip));
+    if ($ip_data && $ip_data->geoplugin_countryName != null) {
+        $result['country'] = $ip_data->geoplugin_countryCode;
+        $result['city'] = $ip_data->geoplugin_city;
+    }
+    return $result;
+}
+
+function getNavigator()
+{
+    if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE)
         return 'Internet explorer';
-    elseif(strpos($_SERVER['HTTP_USER_AGENT'], 'Trident') !== FALSE) //For Supporting IE 11
+    elseif (strpos($_SERVER['HTTP_USER_AGENT'], 'Trident') !== FALSE) //For Supporting IE 11
         return 'Internet explorer';
-    elseif(strpos($_SERVER['HTTP_USER_AGENT'], 'Firefox') !== FALSE)
+    elseif (strpos($_SERVER['HTTP_USER_AGENT'], 'Firefox') !== FALSE)
         return 'Mozilla Firefox';
-    elseif(strpos($_SERVER['HTTP_USER_AGENT'], 'Chrome') !== FALSE)
+    elseif (strpos($_SERVER['HTTP_USER_AGENT'], 'Chrome') !== FALSE)
         return 'Google Chrome';
-    elseif(strpos($_SERVER['HTTP_USER_AGENT'], 'Opera Mini') !== FALSE)
+    elseif (strpos($_SERVER['HTTP_USER_AGENT'], 'Opera Mini') !== FALSE)
         return "Opera Mini";
-    elseif(strpos($_SERVER['HTTP_USER_AGENT'], 'Opera') !== FALSE)
+    elseif (strpos($_SERVER['HTTP_USER_AGENT'], 'Opera') !== FALSE)
         return "Opera";
-    elseif(strpos($_SERVER['HTTP_USER_AGENT'], 'Safari') !== FALSE)
+    elseif (strpos($_SERVER['HTTP_USER_AGENT'], 'Safari') !== FALSE)
         return "Safari";
     else
         return 'Something else';

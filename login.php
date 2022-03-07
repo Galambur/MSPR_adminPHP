@@ -4,7 +4,7 @@ require_once("head.php");
 
 $bdd = getDatabase();
 
-// etape 1 : on vérifie que l'ip n'a pas tenté trop de connexions
+// etape 1 : on verifie que l'ip n'a pas tente trop de connexions
 if (isset($bdd) AND !empty($_POST['email']) AND !empty($_POST['password'])) {
     $_SESSION["erreur"] = null;
     $email = $_POST['email'];
@@ -19,7 +19,7 @@ if (isset($bdd) AND !empty($_POST['email']) AND !empty($_POST['password'])) {
         if (count($connexionsId) >= 1) {
             $tentatives = $connexionsId[0]->nbTentatives;
 
-            // S'il y a eu moins de 10 identifications ratées dans la journée, on tente la connexion
+            // S'il y a eu moins de 10 identifications ratees dans la journee, on tente la connexion
             if ($tentatives < 10) {
                 $connexions = getConnexions($bdd, 'connexions', Array("email" => $_POST['email'], "password" => $_POST['password']), Array());
 
@@ -29,48 +29,62 @@ if (isset($bdd) AND !empty($_POST['email']) AND !empty($_POST['password'])) {
                         if ($connexions[0]->confirme != 1) {
                             inscription($_POST['email'], $_POST['password'], $ip, $navigateur);
                             $_SESSION['erreur'] = "Veuillez confirmer votre email puis vous connecter";
-                        } else if(($connexions[0]->confirme == 1)) {
+                        } else if (($connexions[0]->confirme == 1)) {
                             $id = $connexions[0]->id;
                             $result = connexion($bdd, $id, $email, $password, $ip, $navigateur);
-							if(!$result) {
-								// si le login / email n'existent pas, on rajoute 1 au nb de tentatives
-								$query = "UPDATE connexions SET nbTentatives = nbTentatives + 1 WHERE ip=:ip";
-								$statement = $bdd->prepare($query);
-								$statement->bindParam(':ip', $ip);
-								$statement->execute();
-							}
-                            header("index.php");
+                            if (!$result) {
+                                // si le login / email n'existent pas, on rajoute 1 au nb de tentatives
+                                addEssaie($bdd, $ip);
+                                header("Location: index.php");
+                            } else {
+                                $_SESSION['erreur'] = "Connecte correctement";
+                                header("Location: connecte.php");
+                            }
                         }
                     } elseif (count($connexions) > 1) {
                         // Il existe plusieurs client avec la même adresse email
-                        $_SESSION["erreur"] = "Plusieurs adresses mail trouvées";
+                        $_SESSION["erreur"] = "Plusieurs adresses mail trouvees";
+                        header("Location: index.php");
                     } else {
                         // Le mot de passe ou l'email ne correspondent pas
                         $_SESSION["erreur"] = "Mot de passe ou email incorrects";
+                        addEssaie($bdd, $ip);
+                        header("Location: index.php");
                     }
                 } else {
                     // L'email n'est pas reconnu
                     $_SESSION["erreur"] = "Email non reconnu";
+                    addEssaie($bdd, $ip);
+                    header("Location: index.php");
                 }
             } else {
-				header("locked.php");
-			}
+                var_dump("trop d'essais");
+                header("Location: locked.php");
+            }
         }
     } else {
         // c'est la première fois qu'on essaie de se connecter avec cette IP
         inscription($_POST['email'], $_POST['password'], $ip, $navigateur);
-		header("index.php");
+        header("Location: index.php");
     }
+}
+
+function addEssaie($bdd, $ip)
+{
+    $query = "UPDATE connexions SET nbTentatives = nbTentatives + 1 WHERE ip=:ip";
+    $statement = $bdd->prepare($query);
+    $statement->bindParam(':ip', $ip);
+    $statement->execute();
 }
 
 
 function connexion($bdd, $id, $email, $password, $ip, $nav)
 {
-    // vérification que le login / email existe sur l'AD
+// verification que le login / email existe sur l'AD
     if (!verifyAdLogin($email, $password)) {
-		$_SESSION["erreur"] = "Identifiants AD incorrects";
-		return false;
-    } else { 
+        $_SESSION["erreur"] = "Identifiants AD incorrects";
+        return false;
+    } else {
         $connexions = getConnexions($bdd, 'connexions', Array("email" => $_POST['email'], "password" => $_POST['password']), Array());
 
         if (!empty($connexions)) {
@@ -78,7 +92,7 @@ function connexion($bdd, $id, $email, $password, $ip, $nav)
                 $id = $connexions[0]->id;
                 $_SESSION['id'] = $id;
 
-                // envoie de l'email si le navigateur ou l'ip a changé
+                // envoie de l'email si le navigateur ou l'ip a change
                 $CURRENTip = getHostByName(getHostName());
                 $CURRENTnav = getNavigator();
                 $BDDip = $connexions[0]->ip;
@@ -86,18 +100,18 @@ function connexion($bdd, $id, $email, $password, $ip, $nav)
 
                 if ($BDDip != $ip || $BDDnav != $nav) {
                     //$to = $connexions[0]->email;
-					
-					// todo : remettre le bon mail
+
+                    // todo : remettre le bon mail
                     $to = "gaelle.derambure@epsi.fr";
-                    $subject = 'Changement de votre configuration d\'accès';
-                    $message = 'Bonjour ! Nous avons remarqué que votre adresse IP ou votre navigateur
-                         préféré avaient changés. Nous les avons donc mis à jour.';
-                    $headers = 'From: chatelet@chatelet.fr' . "\r\n" .
-                        'X-Mailer: PHP/' . phpversion();
+                    $name = 'Le Chatelet';
+                    $subj = 'Changement de votre configuration d\'acces';
+                    $from = 'clinique@chatelet.local';
+                    $msg = 'Bonjour ! Nous avons remarque que votre adresse IP ou votre navigateur
+                         prefere avaient changes. Nous les avons donc mis a jour.';
 
-                    smtpmailer($to, $subject, $message, $headers);
+                    smtpmailer($to, $from, $name, $subj, $msg);
 
-                    // changement du navigateur ou de l'ip si ils ont changé
+                    // changement du navigateur ou de l'ip si ils ont change
                     if ($BDDip != $ip) {
                         $queryIP = "UPDATE connexions SET ip = :ip WHERE id=:id";
                         $statement = $bdd->prepare($queryIP);
@@ -105,31 +119,20 @@ function connexion($bdd, $id, $email, $password, $ip, $nav)
                         $statement->bindParam(':id', $id);
                         $statement->execute();
                     } else if ($BDDnav != $CURRENTnav) {
-                        $queryNAV = "UPDATE connexions SET navigateur = navigateur WHERE id=:id";
+                        $queryNAV = "UPDATE connexions SET navigateur = :navigateur WHERE id=:id";
                         $statement = $bdd->prepare($queryNAV);
                         $statement->bindParam(':navigateur', $CURRENTnav);
                         $statement->bindParam(':id', $id);
                         $statement->execute();
                     }
                 }
-				$_SESSION['erreur'] = "Correctement connecté";
-				return true;
-            } elseif (count($connexions) > 1) {
-                $_SESSION['id'] = $id;
-                // Il existe plusieurs client avec la même adresse email
-                $_SESSION["erreur"] = "Plusieurs adresses mails trouvées";
-				return false;
-            } else {
-                // Le mot de passe ou l'email ne correspondent pas
-                $_SESSION["erreur"] = "L'email ou le mot de passe est incorrect";
-				return false;
+                $_SESSION['erreur'] = "Correctement connecte";
+                header("Location: index.php");
+                return true;
             }
-        } else {
-            // L'email n'est pas reconnu
-            $_SESSION["erreur"] = "Email inconnu";
-			return false;
         }
     }
+    return false;
 }
 
 
@@ -173,8 +176,8 @@ function connection_ad($ip, $port, $user, $pwd)
 
 <html>
 
-	<?php
-		echo $_SESSION["erreur"];
-	?>
+<?php
+echo $_SESSION["erreur"];
+?>
 
 </html>
