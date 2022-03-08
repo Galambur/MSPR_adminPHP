@@ -150,14 +150,13 @@ function smtpmailer($to, $from, $from_name, $subject, $body)
     }
 }
 
-function getLocationInfoByIp()
+function getLocationInfoByIp($ip)
 {
-    $result = array('country' => '', 'city' => '');
-    $ip = getHostByName(getHostName());
+    $result = null;
+
     $ip_data = @json_decode(file_get_contents("http://www.geoplugin.net/json.gp?ip=" . $ip));
     if ($ip_data && $ip_data->geoplugin_countryName != null) {
-        $result['country'] = $ip_data->geoplugin_countryCode;
-        $result['city'] = $ip_data->geoplugin_city;
+        $result= $ip_data->geoplugin_countryCode;
     }
     return $result;
 }

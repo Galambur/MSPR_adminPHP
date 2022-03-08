@@ -4,14 +4,26 @@ require_once("head.php");
 
 $bdd = getDatabase();
 
+
 // etape 1 : on verifie que l'ip n'a pas tente trop de connexions
 if (isset($bdd) AND !empty($_POST['email']) AND !empty($_POST['password'])) {
     $_SESSION["erreur"] = null;
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    $ip = getHostByName(getHostName());
+    //$ip = getHostByName(getHostName());
+    $externalContent = file_get_contents('http://checkip.dyndns.com/');
+    preg_match('/Current IP Address: \[?([:.0-9a-fA-F]+)\]?/', $externalContent, $m);
+    $ip = $m[1];
+    $country = getLocationInfoByIp($ip);
     $navigateur = getNavigator();
+
+    // si l'adresse IP n'est pas française, on bloque la connexion
+    if($country != 'FR') {
+        $_SESSION['erreur'] = "Vous devez avoir une IP Française";
+        header("Location: notfrench.php");
+        exit;
+    }
 
     $connexionsId = getConnexions($bdd, 'connexions', Array("ip" => $ip), Array());
 
@@ -35,7 +47,7 @@ if (isset($bdd) AND !empty($_POST['email']) AND !empty($_POST['password'])) {
                             if (!$result) {
                                 // si le login / email n'existent pas, on rajoute 1 au nb de tentatives
                                 addEssaie($bdd, $ip);
-                                header("Location: index.php");
+                                //header("Location: index.php");
                             } else {
                                 $_SESSION['erreur'] = "Connecte correctement";
                                 header("Location: connecte.php");
@@ -44,22 +56,22 @@ if (isset($bdd) AND !empty($_POST['email']) AND !empty($_POST['password'])) {
                     } elseif (count($connexions) > 1) {
                         // Il existe plusieurs client avec la même adresse email
                         $_SESSION["erreur"] = "Plusieurs adresses mail trouvees";
-                        header("Location: index.php");
+                        //header("Location: index.php");
                     } else {
                         // Le mot de passe ou l'email ne correspondent pas
                         $_SESSION["erreur"] = "Mot de passe ou email incorrects";
                         addEssaie($bdd, $ip);
-                        header("Location: index.php");
+                        //header("Location: index.php");
                     }
                 } else {
                     // L'email n'est pas reconnu
                     $_SESSION["erreur"] = "Email non reconnu";
                     addEssaie($bdd, $ip);
-                    header("Location: index.php");
+                    //header("Location: index.php");
                 }
             } else {
                 var_dump("trop d'essais");
-                header("Location: locked.php");
+                //header("Location: locked.php");
             }
         }
     } else {
@@ -99,7 +111,6 @@ function connexion($bdd, $id, $email, $password, $ip, $nav)
                 $BDDnav = $connexions[0]->navigateur;
 
                 if ($BDDip != $ip || $BDDnav != $nav) {
-                    //$to = $connexions[0]->email;
 
                     // todo : remettre le bon mail
                     $to = "gaelle.derambure@epsi.fr";

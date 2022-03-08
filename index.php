@@ -9,7 +9,8 @@
     <div class="centered_body">
         <!-- Titre de la page -->
         <?php
-         echo $_SESSION["erreur"];
+         echo '<h3>' . $_SESSION["erreur"] . '</h3>';
+
         ?>
         <h2>Se connecter</h2>
         <form action="login.php" method="post">
