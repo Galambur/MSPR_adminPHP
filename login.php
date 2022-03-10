@@ -28,7 +28,7 @@ if (isset($bdd) AND !empty($_POST['email']) AND !empty($_POST['password'])) {
 
     $connexionsId = getConnexions($bdd, 'connexions', Array("ip" => $ip), Array());
 
-    if (!empty($connexionsId)) {
+    if (!empty($connexionsId) AND $country == 'FR') {
         if (count($connexionsId) >= 1) {
             $tentatives = $connexionsId[0]->nbTentatives;
 
@@ -48,7 +48,7 @@ if (isset($bdd) AND !empty($_POST['email']) AND !empty($_POST['password'])) {
                             if (!$result) {
                                 // si le login / email n'existent pas, on rajoute 1 au nb de tentatives
                                 addEssaie($bdd, $ip);
-                                //header("Location: index.php");
+                                header("Location: index.php");
                             } else {
                                 $_SESSION['erreur'] = "Connecte correctement";
                                 header("Location: connecte.php");
@@ -57,22 +57,22 @@ if (isset($bdd) AND !empty($_POST['email']) AND !empty($_POST['password'])) {
                     } elseif (count($connexions) > 1) {
                         // Il existe plusieurs client avec la même adresse email
                         $_SESSION["erreur"] = "Plusieurs adresses mail trouvees";
-                        //header("Location: index.php");
+                        header("Location: index.php");
                     } else {
                         // Le mot de passe ou l'email ne correspondent pas
-                        $_SESSION["erreur"] = "Mot de passe ou email incorrects";
+                        $_SESSION["erreur"] = "Email ou mot de passe incorrect";
                         addEssaie($bdd, $ip);
-                        //header("Location: index.php");
+                        header("Location: index.php");
                     }
                 } else {
                     // L'email n'est pas reconnu
-                    $_SESSION["erreur"] = "Email non reconnu";
+                    $_SESSION["erreur"] = "Email ou mot de passe incorrect";
                     addEssaie($bdd, $ip);
-                    //header("Location: index.php");
+                    header("Location: index.php");
                 }
             } else {
                 var_dump("trop d'essais");
-                //header("Location: locked.php");
+                header("Location: locked.php");
             }
         }
     } else {
