@@ -12,13 +12,14 @@ if (isset($bdd) AND !empty($_POST['email']) AND !empty($_POST['password'])) {
     $password = $_POST['password'];
 
     //$ip = getHostByName(getHostName());
-    $externalContent = file_get_contents('http://checkip.dyndns.com/');
+    $externalContent = file_get_contents("http://checkip.dyndns.com/");
     preg_match('/Current IP Address: \[?([:.0-9a-fA-F]+)\]?/', $externalContent, $m);
     $ip = $m[1];
     $country = getLocationInfoByIp($ip);
     $navigateur = getNavigator();
 
     // si l'adresse IP n'est pas française, on bloque la connexion
+	//$country = 'EN';
     if($country != 'FR') {
         $_SESSION['erreur'] = "Vous devez avoir une IP Française";
         header("Location: notfrench.php");

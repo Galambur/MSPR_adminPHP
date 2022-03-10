@@ -5,7 +5,7 @@ function getDataBase()
 {
     try {
         $bdd = new PDO('mysql:host=localhost;dbname=chateletdb;charset=utf8',
-            'root', '', array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+            'admin', 'admin', array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
     } catch (Exception $exception) {
         $bdd = null;
     }
@@ -110,7 +110,7 @@ function inscription($email, $mdp, $ip, $nav)
         $from = 'clinique@chatelet.local';
         $name = 'Le Chatelet';
         $subj = 'Email de confirmation de compte';
-        $msg = '<a href = "http://mspradmin/verif.php?id=' . $_SESSION['id'] . '&cle=' . $cle .'">Verifier votre email'. '</a>';
+        $msg = '<a href = "https://192.168.208.130/verif.php?id=' . $_SESSION['id'] . '&cle=' . $cle .'">Verifier votre email'. '</a>';
 
         smtpmailer($to, $from, $name, $subj, $msg);
     }
